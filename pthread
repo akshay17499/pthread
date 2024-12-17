@@ -1,0 +1,65 @@
+#include<stdio.h>
+#include<pthread.h>
+#include<stdlib.h>
+#include<unistd.h>
+typedef struct node
+{
+    int*arr;
+    int *left;
+    int *right;
+}node;
+
+typedef struct node node;
+
+void*sum(void*arg)
+{
+   int left = *(((node*)arg)->left);
+   int right = *(((node*)arg)->right);
+   printf("left : %d   ",left);
+   printf("right : %d\n",right);
+   int*arr = ((node*)arg)->arr;
+   int sum = 0;
+   for(int i=left;i<right;i++)
+   {
+      sum = sum + *(arr+i);
+   }
+   free(((node*)arg)->left);
+   return (void*)sum;
+}
+
+int main()
+{
+    pthread_t thread[2];
+    printf("enter size of array : ");
+    int size;
+    scanf("%d",&size);
+    node temp;
+    printf("enter array elements : ");
+    temp.arr = malloc(size*sizeof(int));
+    for(int i=0;i<size;i++)
+    {
+        scanf("%d",&temp.arr[i]);
+    }
+    for(int i=0;i<2;i++)
+    {
+        sleep(2);
+      temp.left = malloc(sizeof(int));
+      temp.right = malloc(sizeof(int));
+      *(temp.left) = size/2*i;
+      *(temp.right) = size/2 + *(temp.left);
+      
+      if(pthread_create(&thread[i],NULL,sum,(void*)&temp)!=0)
+      {
+        printf("thread creation failed\n");
+      }
+    }
+
+    int num = 0;
+    int sum =0;
+    for(int i=0;i<2;i++)
+    {
+        pthread_join(thread[i],(void*)&num);
+        sum = sum + num;
+    }
+    printf("sum = %d",sum);
+}
