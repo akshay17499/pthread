@@ -1,0 +1,53 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+
+void*print(void*arg)
+{
+    int size = 1024*1024;
+    int arr[1024*1024];
+    int *sum = malloc(4);
+    *sum = *((int*)arg); 
+    for(int i=0;i<size;i++)
+    {
+        arr[i] = 1;
+        *sum = *sum + arr[i];
+    }
+    return (void*)&sum;
+}
+
+int main()
+{
+    pthread_t thread;
+    pthread_attr_t attr;
+
+    size_t size = 1025*1025;
+
+    if(pthread_attr_init(&attr)!=0)
+    {
+        printf("initilization failed\n");
+        return 1;
+    }
+    void* stack_start = malloc(size);
+    if(pthread_attr_setstack(&attr,stack_start,size)!=0)
+    {
+        printf("stack creation failed\n");
+        pthread_attr_destroy(&attr);
+        return 1;
+    }
+     int num;
+     printf("enter num : ");
+     scanf("%d",&num);
+    if(pthread_create(&thread,&attr,print,(void*)&num)!=0)
+    {
+        printf("thread creation failed\n");
+        return 1;
+    }
+     int*num1;
+    pthread_join(thread,(void*)&num1);
+
+    pthread_attr_destroy(&attr);
+
+    printf("o/p = %d",*num1);
+
+}
