@@ -1,0 +1,47 @@
+#include<stdio.h>
+#include<pthread.h>
+#include<string.h>
+#include<stdlib.h>
+
+void*print(void*arg)
+{
+    char*ptr = malloc(30*sizeof(char));
+    strcpy(ptr,(char*)arg);
+   // printf("%s : from thread\n",(char*)arg);
+    return (void*)ptr;
+}
+
+int main()
+{
+    pthread_t thread;
+    pthread_attr_t attr;
+
+    if(pthread_attr_init(&attr)!=0)
+    {
+        printf("failed to initialize\n");
+        
+        return 1;
+    }
+    size_t size = 1024*18;
+    if(pthread_attr_setstacksize(&attr,size)!=0)
+    {
+        printf("stack size fixing failed\n");
+        pthread_attr_destroy(&attr);
+        return 1;
+    }
+    char arr[30];
+    printf("enter name : ");
+    scanf("%s",arr);
+    if(pthread_create(&thread,NULL,print,(void*)arr)!=0)
+    {
+        printf("thread creation failed\n");
+        return 1;
+    }
+
+    char*ptr;
+    pthread_join(thread,(void*)&ptr);
+    for(int i=0;i<7;i++)
+    {
+        printf("%c",ptr[i]);
+    }
+}
