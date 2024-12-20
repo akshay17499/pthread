@@ -1,0 +1,48 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<unistd.h>
+
+pthread_mutex_t mutex;
+int count=0;
+
+
+void* print(void*arg)
+{
+    pthread_mutex_lock(&mutex);
+    
+    int c = count;
+    sleep(1);
+    int size = *((int*)arg);
+    for(int i=0;i<size;i++)
+    {
+        c++;
+    }
+    count = c;
+pthread_mutex_unlock(&mutex);
+    return NULL;
+}
+int main()
+{
+    pthread_t thread[2];
+    pthread_mutex_init(&mutex,NULL);
+    int num;
+    printf("enter num : ");
+    scanf("%d",&num);
+    for(int i=0;i<2;i++)
+    {
+       if(pthread_create(&thread[i],NULL,print,(void*)&num)!=0)
+       {
+        printf("thread creation failed\n");
+        pthread_exit(&thread[i]);
+        return 1;
+       }
+    }
+    for(int i=0;i<2;i++)
+    {
+       pthread_join(thread[i],NULL);
+    }
+    pthread_mutex_destroy(&mutex);
+    printf("count = %d",count);
+    
+}
